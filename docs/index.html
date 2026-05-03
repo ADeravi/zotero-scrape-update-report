@@ -154,7 +154,13 @@
         text-decoration: none;
         font-weight: 700;
       }
-.bmc-btn-container element to 220px
+
+      /* The button itself, ensuring it expands to the container width */
+      .bmc-btn {
+        min-width: 220px !important;
+        width: 100%;
+      }
+    
       .button.primary {
         border-color: var(--accent);
         background: var(--accent);
