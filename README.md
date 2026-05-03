@@ -4,6 +4,8 @@ Scrape, Update & Report is a Zotero plugin for one-click academic metadata scrap
 
 This repository is a maintained fork of [Creling/Zotero-Metadata-Scraper](https://github.com/Creling/Zotero-Metadata-Scraper). It remains licensed under AGPL-3.0-or-later.
 
+Project page: [https://aderavi.github.io/zotero-scrape-update-report/](https://aderavi.github.io/zotero-scrape-update-report/)
+
 ## How to use
 
 Right-click the Zotero parent item and choose **Scrape, Update & Report** from the item menu. The plugin creates a child scrape report note, updates safe bibliographic fields, and adds extracted keywords as Zotero tags.

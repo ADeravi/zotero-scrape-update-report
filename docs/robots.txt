@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://aderavi.github.io/zotero-scrape-update-report/sitemap.xml
