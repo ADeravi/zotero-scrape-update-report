@@ -2,8 +2,8 @@ import { ExternalMetadata, ExternalMetadataResolver } from "./externalMetadataRe
 import { KeywordExtractor } from "./keywordExtractor";
 
 export class StructuredInfoExtractor {
-  private static readonly NOTE_MARKER = "Metadata Scraper: Paper-content information";
-  private static readonly NOTE_FIRST_CREATED_PREFIX = "Metadata Scraper First Created:";
+  private static readonly NOTE_HEADING_PREFIX = "Scrape report |";
+  private static readonly LEGACY_NOTE_MARKER = "Metadata Scraper: Paper-content information";
 
   public static async oneClickUpdateItem(item: Zotero.Item): Promise<boolean | "cancelled"> {
     if (!this.isSupportedItem(item)) {
@@ -343,7 +343,6 @@ export class StructuredInfoExtractor {
       ["Sources", (merged.sources || []).join(", ")],
     ];
     return [
-      "<!-- Metadata Scraper: Error report -->",
       `<h1>Scrape error report | ${this.escapeHTML(createdDateLabel)}</h1>`,
       `<p><strong>Date created:</strong> ${this.escapeHTML(createdAt)}</p>`,
       "<p><strong>Status:</strong> Metadata update needs review because external metadata did not safely match the Zotero item identity.</p>",
@@ -384,7 +383,7 @@ export class StructuredInfoExtractor {
       const noteIDs = item.getNotes?.() || [];
       for (const noteID of noteIDs) {
         const note = Zotero.Items.get(noteID);
-        if (note?.isNote?.() && String((note as any).getNote?.() || "").includes(this.NOTE_MARKER)) {
+        if (note?.isNote?.() && this.isManagedPaperContentNoteHTML(String((note as any).getNote?.() || ""))) {
           return note;
         }
       }
@@ -396,15 +395,18 @@ export class StructuredInfoExtractor {
 
   private static getFirstCreatedFromNote(note: Zotero.Item): string {
     const html = String((note as any).getNote?.() || "");
-    const match = html.match(/Metadata Scraper First Created:\s*([^<\n]+)/);
-    return match?.[1]?.replace(/-->.*/, "").trim() || "";
+    const legacyMatch = html.match(/Metadata Scraper First Created:\s*([^<\n]+)/);
+    if (legacyMatch?.[1]) {
+      return legacyMatch[1].replace(/-->.*/, "").trim();
+    }
+    const visibleMatch = html.match(/<strong>\s*Date first created:\s*<\/strong>\s*([^<]+)/i);
+    return visibleMatch?.[1]?.trim() || "";
   }
 
   private static buildPlaceholderNoteHTML(firstCreated: string): string {
     return [
-      `<!-- ${this.NOTE_MARKER} -->`,
-      `<!-- ${this.NOTE_FIRST_CREATED_PREFIX} ${this.escapeHTML(firstCreated)} -->`,
       `<h1>Scrape report | ${this.escapeHTML(this.formatDateDDMMYYYY(new Date()))}</h1>`,
+      `<p><strong>Date first created:</strong> ${this.escapeHTML(firstCreated)}</p>`,
       "<p><strong>Status:</strong> Preparing external metadata lookup.</p>",
     ].join("");
   }
@@ -417,14 +419,21 @@ export class StructuredInfoExtractor {
   ): string {
     const title = externalInfo.merged.title || "Untitled external record";
     return [
-      `<!-- ${this.NOTE_MARKER} -->`,
-      `<!-- ${this.NOTE_FIRST_CREATED_PREFIX} ${this.escapeHTML(firstCreated)} -->`,
       `<h1>Scrape report | ${this.escapeHTML(updatedDateLabel)}</h1>`,
       `<p><strong>Title:</strong> ${this.escapeHTML(title)}</p>`,
       `<p><strong>Date first created:</strong> ${this.escapeHTML(firstCreated)}</p>`,
       `<p><strong>Date updated:</strong> ${this.escapeHTML(updatedAt)}</p>`,
       this.buildPaperContentDetailsHTML(externalInfo, false),
     ].join("");
+  }
+
+  private static isManagedPaperContentNoteHTML(html: string): boolean {
+    if (html.includes(this.LEGACY_NOTE_MARKER)) {
+      return true;
+    }
+    const noteTitle = html.match(/<h1[^>]*>\s*([^<]+)/i)?.[1] || "";
+    const cleanTitle = this.cleanPlainText(noteTitle).replace(/^X(?=Scrape report\s*\|)/i, "");
+    return cleanTitle.startsWith(this.NOTE_HEADING_PREFIX);
   }
 
   private static buildPaperContentDetailsHTML(externalInfo: ExternalMetadata, includeTitle = true): string {
