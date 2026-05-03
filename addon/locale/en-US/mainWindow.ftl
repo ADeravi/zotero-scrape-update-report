@@ -1,11 +1,11 @@
 item-section-example1-head-text =
-    .label = Plugin Template: Item Info
+    .label = Scrape, Update & Report
 item-section-example1-sidenav-tooltip =
-    .tooltiptext = This is Plugin Template section (item info)
+    .tooltiptext = Scrape, Update & Report item information
 item-section-example2-head-text =
-    .label = Plugin Template: Reader [{$status}]
+    .label = Scrape, Update & Report [{$status}]
 item-section-example2-sidenav-tooltip =
-    .tooltiptext = This is Plugin Template section (reader)
+    .tooltiptext = Scrape, Update & Report reader information
 item-section-example2-button-tooltip =
     .tooltiptext = Unregister this section
-item-info-row-example-label = Example Row
+item-info-row-example-label = Scrape report

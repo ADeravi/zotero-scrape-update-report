@@ -1,20 +1,20 @@
 {
   "manifest_version": 2,
-  "name": "Zotero Metadata Scraper",
+  "name": "Scrape, Update & Report",
   "version": "1.0.0",
-  "description": "A Zotero plugin to fetch metadata from multiple sources",
-  "homepage_url": "https://github.com/creling/zotero-metadata-scraper",
-  "author": "creling",
+  "description": "A Zotero plugin for one-click academic metadata scraping, safe field updates, keyword tagging, and discrepancy reports.",
+  "homepage_url": "https://github.com/ADeravi/zotero-scrape-update-report",
+  "author": "Ashkan Deravi, based on original work by creling",
   "icons": {
-    "48": "content/icons/favicon@0.5x.png",
-    "96": "content/icons/favicon.png"
+    "48": "content/icons/pickaxe-theme.svg",
+    "96": "content/icons/pickaxe-theme.svg"
   },
   "applications": {
     "zotero": {
       "id": "__addonID__",
       "update_url": "__updateURL__",
       "strict_min_version": "7.0",
-      "strict_max_version": "7.*"
+      "strict_max_version": "9.*"
     }
   }
 }

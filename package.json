@@ -1,23 +1,23 @@
 {
-  "name": "zotero-metadata-scraper",
+  "name": "zotero-scrape-update-report",
   "version": "1.0.0",
-  "description": "A Zotero plugin to fetch metadata from multiple sources",
+  "description": "A Zotero plugin for one-click academic metadata scraping, safe field updates, keyword tagging, and discrepancy reports from DBLP, Semantic Scholar, and OpenAlex.",
   "config": {
-    "addonName": "Zotero Metadata Scraper",
-    "addonID": "metadatascraper@creling",
-    "addonRef": "metadatascraper",
-    "addonInstance": "MetadataScraper",
-    "prefsPrefix": "extensions.zotero.metadatascraper"
+    "addonName": "Scrape, Update & Report",
+    "addonID": "scrape-update-report@aderavi",
+    "addonRef": "scrapeupdatereport",
+    "addonInstance": "ScrapeUpdateReport",
+    "prefsPrefix": "extensions.zotero.scrapeupdatereport"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/creling/zotero-metadata-scraper.git"
+    "url": "git+https://github.com/ADeravi/zotero-scrape-update-report.git"
   },
-  "author": "creling",
+  "author": "Ashkan Deravi, based on original work by creling",
   "bugs": {
-    "url": "https://github.com/creling/zotero-metadata-scraper/issues"
+    "url": "https://github.com/ADeravi/zotero-scrape-update-report/issues"
   },
-  "homepage": "https://github.com/creling/zotero-metadata-scraper#readme",
+  "homepage": "https://github.com/ADeravi/zotero-scrape-update-report#readme",
   "license": "AGPL-3.0-or-later",
   "scripts": {
     "start": "zotero-plugin serve",
