@@ -130,8 +130,8 @@ npm run lint:fix
 The release workflow is inherited from the upstream Zotero plugin scaffold. Tag a release with:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git tag vX.Y.Z
+git push origin vX.Y.Z
 ```
 
 GitHub Actions will build and publish release assets when repository Actions are enabled.

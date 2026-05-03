@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.1 - 2026-05-03
+
+- Removed hidden note marker comments that could appear as a leading `X` before generated scrape report note titles.
+- Kept backward compatibility so existing managed scrape report notes are still found and updated in place.
+
 ## 1.0.0 - 2026-05-03
 
 Initial public release of Scrape, Update & Report.
