@@ -9,10 +9,9 @@
       content="Scrape, Update & Report is a Zotero plugin for one-click academic metadata updates, scrape report notes, keyword tags, and DBLP, Semantic Scholar, and OpenAlex cross-checking."
     />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)" />
-    <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#242424" />
     <link rel="canonical" href="https://aderavi.github.io/zotero-scrape-update-report/" />
-    <link rel="icon" href="images/pickaxe-theme.svg" type="image/svg+xml" />
+    <link rel="icon" href="images/pickaxe-white.svg" type="image/svg+xml" />
     <meta property="og:title" content="Scrape, Update & Report | Zotero Plugin" />
     <meta
       property="og:description"
@@ -41,26 +40,16 @@
     </script>
     <style>
       :root {
-        color-scheme: light dark;
-        --bg: #f8fafc;
-        --panel: #ffffff;
-        --text: #0f172a;
-        --muted: #475569;
-        --line: #cbd5e1;
-        --accent: #1d4ed8;
-        --accent-strong: #1e40af;
-      }
-
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --bg: #0f172a;
-          --panel: #111827;
-          --text: #f8fafc;
-          --muted: #cbd5e1;
-          --line: #334155;
-          --accent: #60a5fa;
-          --accent-strong: #93c5fd;
-        }
+        color-scheme: dark;
+        --bg: #242424;
+        --panel: #2f2f2f;
+        --panel-strong: #383838;
+        --text: #f5f5f5;
+        --muted: #c7c7c7;
+        --line: #4a4a4a;
+        --accent: #e7e7e7;
+        --accent-strong: #ffffff;
+        --button-text: #202020;
       }
 
       * {
@@ -99,7 +88,7 @@
         place-items: center;
         border: 1px solid var(--line);
         border-radius: 8px;
-        background: var(--panel);
+        background: var(--panel-strong);
       }
 
       .logo-mark img {
@@ -156,11 +145,12 @@
       .button.primary {
         border-color: var(--accent);
         background: var(--accent);
-        color: #ffffff;
+        color: var(--button-text);
       }
 
       .button.primary:hover {
         background: var(--accent-strong);
+        color: var(--button-text);
       }
 
       section {
@@ -240,6 +230,10 @@
         color: var(--muted);
       }
 
+      a {
+        color: var(--accent);
+      }
+
       @media (max-width: 780px) {
         header {
           padding-top: 44px;
@@ -266,7 +260,7 @@
       <header>
         <div class="brand">
           <span class="logo-mark" aria-hidden="true">
-            <img src="images/pickaxe-theme.svg" alt="" />
+            <img src="images/pickaxe-white.svg" alt="" />
           </span>
           <p class="eyebrow">Zotero plugin</p>
         </div>
