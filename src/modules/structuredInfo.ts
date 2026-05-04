@@ -1,6 +1,15 @@
 import { ExternalMetadata, ExternalMetadataResolver } from "./externalMetadataResolver";
 import { KeywordExtractor } from "./keywordExtractor";
 
+type IdentityCheckRow = {
+  field: string;
+  current: string;
+  external: string;
+  status: "Matched" | "Not matched" | "Missing current" | "Missing external" | "Missing";
+  reason: string;
+  isMismatch: boolean;
+};
+
 export class StructuredInfoExtractor {
   private static readonly NOTE_HEADING_PREFIX = "Scrape report |";
   private static readonly LEGACY_NOTE_MARKER = "Metadata Scraper: Paper-content information";
@@ -12,14 +21,15 @@ export class StructuredInfoExtractor {
     const externalInfo = await ExternalMetadataResolver.fetchForItem(item);
     if (!externalInfo.records.length) {
       if (this.hasExternalIdentityRejection(externalInfo)) {
-        await this.createDiscrepancyErrorReportNote(item, externalInfo, this.buildNoTrustedMatchDiscrepancies(item));
+        await this.createDiscrepancyErrorReportNote(item, externalInfo, this.getIdentityCheckRows(item, externalInfo));
       }
       return false;
     }
-    const discrepancies = this.getIdentityDiscrepancies(item, externalInfo);
+    const identityChecks = this.getIdentityCheckRows(item, externalInfo);
+    const discrepancies = this.getIdentityDiscrepancies(identityChecks);
     if (discrepancies.length) {
-      await this.createDiscrepancyErrorReportNote(item, externalInfo, discrepancies);
-      if (!(await this.confirmDiscrepancyUpdate(discrepancies))) {
+      await this.createDiscrepancyErrorReportNote(item, externalInfo, identityChecks);
+      if (!(await this.confirmDiscrepancyUpdate(discrepancies, identityChecks))) {
         return "cancelled";
       }
     }
@@ -29,41 +39,86 @@ export class StructuredInfoExtractor {
     return this.updateBibliographicMetadataFields(item, externalInfo);
   }
 
-  private static getIdentityDiscrepancies(item: Zotero.Item, externalInfo: ExternalMetadata) {
+  private static getIdentityCheckRows(item: Zotero.Item, externalInfo: ExternalMetadata): IdentityCheckRow[] {
     const merged = externalInfo.merged || {};
-    const checks = [
-      {
-        field: "Title",
-        current: this.getItemField(item, "title"),
-        external: merged.title,
-        normalize: (value: unknown) => ExternalMetadataResolver.normalizeTitle(value),
-      },
-      {
-        field: "Date",
-        current: this.getItemField(item, "date"),
-        external: merged.date || merged.year,
-        normalize: (value: unknown) => this.normalizeDateForComparison(value),
-      },
-      {
-        field: "DOI",
-        current: this.getItemField(item, "DOI"),
-        external: merged.doi,
-        normalize: (value: unknown) => ExternalMetadataResolver.normalizeDOI(value),
-      },
+    return [
+      this.buildIdentityCheckRow("Title", this.getItemField(item, "title"), merged.title, (value) =>
+        ExternalMetadataResolver.normalizeTitle(value),
+      ),
+      this.buildIdentityCheckRow("Date", this.getItemField(item, "date"), merged.date || merged.year, (value) =>
+        this.normalizeDateForComparison(value),
+      ),
+      this.buildIdentityCheckRow("DOI", this.getItemField(item, "DOI"), merged.doi, (value) =>
+        ExternalMetadataResolver.normalizeDOI(value),
+      ),
     ];
-    return checks
-      .filter((check) => {
-        const current = this.cleanPlainText(check.current);
-        const external = this.cleanPlainText(check.external);
-        if (!current || !external) {
-          return false;
-        }
-        return check.normalize(current) !== check.normalize(external);
-      })
+  }
+
+  private static buildIdentityCheckRow(
+    field: string,
+    currentValue: unknown,
+    externalValue: unknown,
+    normalize: (value: unknown) => string,
+  ): IdentityCheckRow {
+    const current = this.cleanPlainText(currentValue);
+    const external = this.cleanPlainText(externalValue);
+    if (!current && !external) {
+      return {
+        field,
+        current,
+        external,
+        status: "Missing",
+        reason: `${field} is missing in both Zotero and the external metadata.`,
+        isMismatch: false,
+      };
+    }
+    if (!current) {
+      return {
+        field,
+        current,
+        external,
+        status: "Missing current",
+        reason: `${field} is available externally but missing in Zotero.`,
+        isMismatch: false,
+      };
+    }
+    if (!external) {
+      return {
+        field,
+        current,
+        external,
+        status: "Missing external",
+        reason: `${field} is available in Zotero but missing from the trusted external metadata.`,
+        isMismatch: false,
+      };
+    }
+    if (normalize(current) === normalize(external)) {
+      return {
+        field,
+        current,
+        external,
+        status: "Matched",
+        reason: `${field} matches after normalization.`,
+        isMismatch: false,
+      };
+    }
+    return {
+      field,
+      current,
+      external,
+      status: "Not matched",
+      reason: `${field} differs between Zotero and the trusted external metadata.`,
+      isMismatch: true,
+    };
+  }
+
+  private static getIdentityDiscrepancies(identityChecks: IdentityCheckRow[]) {
+    return identityChecks
+      .filter((check) => check.isMismatch)
       .map((check) => ({
         field: check.field,
-        current: this.cleanPlainText(check.current),
-        external: this.cleanPlainText(check.external),
+        current: check.current,
+        external: check.external,
       }));
   }
 
@@ -73,21 +128,10 @@ export class StructuredInfoExtractor {
     );
   }
 
-  private static buildNoTrustedMatchDiscrepancies(item: Zotero.Item) {
-    return [
-      {
-        field: "External lookup",
-        current: [
-          `Title: ${this.getItemField(item, "title") || "Not available"}`,
-          `Date: ${this.getItemField(item, "date") || "Not available"}`,
-          `DOI: ${this.getItemField(item, "DOI") || "Not available"}`,
-        ].join("; "),
-        external: "No trusted external record matched the Zotero title, date, and DOI.",
-      },
-    ];
-  }
-
-  private static confirmDiscrepancyUpdate(discrepancies: Array<{ field: string; current: string; external: string }>) {
+  private static confirmDiscrepancyUpdate(
+    discrepancies: Array<{ field: string; current: string; external: string }>,
+    identityChecks: IdentityCheckRow[],
+  ) {
     return new Promise<boolean>((resolve) => {
       let settled = false;
       const finish = (shouldUpdate: boolean) => {
@@ -129,6 +173,10 @@ export class StructuredInfoExtractor {
           },
         },
       ]);
+      const matchedFields = identityChecks
+        .filter((check) => check.status === "Matched")
+        .map((check) => check.field)
+        .join(", ");
       const dialog = new (ztoolkit as any).Dialog(1, 1);
       dialog.dialogData.loadCallback = () => this.applyDiscrepancyDialogTheme(dialog);
       dialog.dialogData.unloadCallback = () => finish(false);
@@ -156,7 +204,19 @@ export class StructuredInfoExtractor {
               },
               properties: {
                 value:
-                  "The external record does not match the current Zotero title, date, or DOI. Choose Update to force the external metadata onto the item, or Cancel to stop the scrape update.",
+                  "A trusted external record was found, but some Zotero identity fields differ. Review the differences below. Choose Update to apply the external title, date, and metadata, or Cancel to stop the scrape update.",
+              },
+            },
+            {
+              tag: "description",
+              styles: {
+                width: "680px",
+                marginBottom: "8px",
+              },
+              properties: {
+                value: matchedFields
+                  ? `Matched identity field(s): ${matchedFields}.`
+                  : "No identity fields matched cleanly; only update if you are sure this is the same paper.",
               },
             },
             ...rows,
@@ -304,7 +364,7 @@ export class StructuredInfoExtractor {
   private static async createDiscrepancyErrorReportNote(
     item: Zotero.Item,
     externalInfo: ExternalMetadata,
-    discrepancies: Array<{ field: string; current: string; external: string }>,
+    identityChecks: IdentityCheckRow[],
   ) {
     const createdDate = new Date();
     const note = new Zotero.Item("note");
@@ -314,7 +374,7 @@ export class StructuredInfoExtractor {
       this.buildDiscrepancyErrorReportHTML(
         item,
         externalInfo,
-        discrepancies,
+        identityChecks,
         this.formatDateTime(createdDate),
         this.formatDateDDMMYYYY(createdDate),
       ),
@@ -325,57 +385,90 @@ export class StructuredInfoExtractor {
   private static buildDiscrepancyErrorReportHTML(
     item: Zotero.Item,
     externalInfo: ExternalMetadata,
-    discrepancies: Array<{ field: string; current: string; external: string }>,
+    identityChecks: IdentityCheckRow[],
     createdAt: string,
     createdDateLabel: string,
   ): string {
-    const merged = externalInfo.merged || {};
-    const records = externalInfo.records || [];
-    const currentRows: Array<[string, unknown]> = [
-      ["Title", this.getItemField(item, "title")],
-      ["Date", this.getItemField(item, "date")],
-      ["DOI", this.getItemField(item, "DOI")],
-    ];
-    const externalRows: Array<[string, unknown]> = [
-      ["Title", merged.title],
-      ["Date", merged.date || merged.year],
-      ["DOI", merged.doi],
-      ["Sources", (merged.sources || []).join(", ")],
-    ];
+    const hasTrustedRecord = Boolean(externalInfo.records?.length);
     return [
       `<h1>Scrape error report | ${this.escapeHTML(createdDateLabel)}</h1>`,
       `<p><strong>Date created:</strong> ${this.escapeHTML(createdAt)}</p>`,
-      "<p><strong>Status:</strong> Metadata update needs review because external metadata did not safely match the Zotero item identity.</p>",
-      this.buildTableSection("Current Zotero identity", currentRows),
-      this.buildTableSection("External merged identity", externalRows),
-      "<h2>Discrepancy</h2>",
-      discrepancies.length
-        ? `<ul>${discrepancies
-            .map(
-              (difference) =>
-                `<li><strong>${this.escapeHTML(difference.field)}:</strong> Current Zotero: ${this.escapeHTML(
-                  difference.current,
-                )} | External record: ${this.escapeHTML(difference.external)}</li>`,
-            )
-            .join("")}</ul>`
-        : "<p>No field-level discrepancy details were available.</p>",
-      this.buildListSection("Source cross-check", externalInfo.crossChecks || []),
-      this.buildListSection(
-        "External records considered",
-        records.map((record) =>
-          [
-            record.source,
-            record.title && `Title: ${record.title}`,
-            (record.date || record.year) && `Date: ${record.date || record.year}`,
-            record.doi && `DOI: ${record.doi}`,
-          ]
-            .filter(Boolean)
-            .join(" | "),
-        ),
-      ),
-      "<h2>Action</h2>",
-      "<p>No standard Zotero fields should be changed unless the discrepancy is intentionally accepted from the modal.</p>",
+      "<h2>Reason</h2>",
+      `<p>${this.escapeHTML(this.getDiscrepancyErrorReason(externalInfo, identityChecks))}</p>`,
+      hasTrustedRecord
+        ? this.buildIdentityMatchSummarySection(identityChecks)
+        : this.buildRejectedCandidateSummarySection(item, externalInfo),
     ].join("");
+  }
+
+  private static getDiscrepancyErrorReason(externalInfo: ExternalMetadata, identityChecks: IdentityCheckRow[]): string {
+    if (!externalInfo.records?.length) {
+      return "No trusted external record matched the Zotero item identity.";
+    }
+    const mismatched = identityChecks
+      .filter((check) => check.isMismatch)
+      .map((check) => check.field)
+      .join(", ");
+    const matched = identityChecks
+      .filter((check) => check.status === "Matched")
+      .map((check) => check.field)
+      .join(", ");
+    return [
+      mismatched
+        ? `${mismatched} differs between Zotero and the trusted external metadata.`
+        : "External metadata requires review before updating Zotero fields.",
+      matched ? `${matched} matched.` : "No identity field matched cleanly.",
+    ].join(" ");
+  }
+
+  private static buildIdentityMatchSummarySection(identityChecks: IdentityCheckRow[]): string {
+    const rows = identityChecks.map(
+      (check) =>
+        `<li><strong>${this.escapeHTML(check.field)}:</strong> ${this.escapeHTML(check.status)}. Current Zotero: ${this.escapeHTML(
+          check.current || "Not available",
+        )} | External record: ${this.escapeHTML(check.external || "Not available")}. ${this.escapeHTML(
+          check.reason,
+        )}</li>`,
+    );
+    return `<h2>What matched / what did not</h2><ul>${rows.join("")}</ul>`;
+  }
+
+  private static buildRejectedCandidateSummarySection(item: Zotero.Item, externalInfo: ExternalMetadata): string {
+    const candidates = externalInfo.rejectedRecords || [];
+    if (!candidates.length) {
+      return this.buildListSection("What matched / what did not", externalInfo.crossChecks || []);
+    }
+    const rows = candidates.map((candidate) => {
+      const checks = [
+        this.buildIdentityCheckRow("Title", this.getItemField(item, "title"), candidate.title, (value) =>
+          ExternalMetadataResolver.normalizeTitle(value),
+        ),
+        this.buildIdentityCheckRow("Date", this.getItemField(item, "date"), candidate.date, (value) =>
+          this.normalizeDateForComparison(value),
+        ),
+        this.buildIdentityCheckRow("DOI", this.getItemField(item, "DOI"), candidate.doi, (value) =>
+          ExternalMetadataResolver.normalizeDOI(value),
+        ),
+      ];
+      const matched = checks
+        .filter((check) => check.status === "Matched")
+        .map((check) => check.field)
+        .join(", ");
+      const notMatched = checks
+        .filter((check) => check.status === "Not matched")
+        .map((check) => `${check.field} (${check.current || "not available"} vs ${check.external || "not available"})`)
+        .join("; ");
+      const missing = checks
+        .filter((check) => check.status.startsWith("Missing"))
+        .map((check) => `${check.field}: ${check.status.toLowerCase()}`)
+        .join("; ");
+      return `<li><strong>${this.escapeHTML(candidate.source)}:</strong> ${this.escapeHTML(
+        candidate.reason,
+      )}. Matched: ${this.escapeHTML(matched || "None")}. Not matched: ${this.escapeHTML(
+        notMatched || "None",
+      )}. Missing: ${this.escapeHTML(missing || "None")}.</li>`;
+    });
+    return `<h2>What matched / what did not</h2><ul>${rows.join("")}</ul>`;
   }
 
   private static findManagedPaperContentNote(item: Zotero.Item): Zotero.Item | null {

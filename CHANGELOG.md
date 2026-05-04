@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2 - 2026-05-04
+
+- Allow exact DOI matches to reach the Update/Cancel confirmation modal even when the external title differs from Zotero.
+- Show date mismatches in the same confirmation modal so the user can either apply the external metadata or cancel the update.
+- Simplify scrape error notes to the reason for the error plus a concise summary of what matched and what did not.
+- Record rejected external candidates with their source, reason, title, date, and DOI so error notes are easier to audit.
+
 ## 1.0.1 - 2026-05-03
 
 - Removed hidden note marker comments that could appear as a leading `X` before generated scrape report note titles.

@@ -49,6 +49,13 @@ export interface ExternalRecord {
 export interface ExternalMetadata {
   lookup: LookupInput;
   records: ExternalRecord[];
+  rejectedRecords?: Array<{
+    source: string;
+    reason: string;
+    title: string;
+    date: string;
+    doi: string;
+  }>;
   merged: Partial<ExternalRecord> & {
     sources?: string[];
   };
@@ -84,6 +91,7 @@ export class ExternalMetadataResolver {
     return {
       lookup,
       records: filtered.records,
+      rejectedRecords: filtered.rejectedRecords,
       merged: this.mergeRecords(filtered.records),
       crossChecks: this.buildCrossChecks(filtered.records, filtered.rejected),
     };
@@ -365,15 +373,23 @@ export class ExternalMetadataResolver {
   private static filterIdentityMatches(lookup: LookupInput, records: ExternalRecord[]) {
     const accepted: ExternalRecord[] = [];
     const rejected: string[] = [];
+    const rejectedRecords: NonNullable<ExternalMetadata["rejectedRecords"]> = [];
     for (const record of records) {
       const match = this.identityMatch(lookup, record);
       if (match.accept) {
         accepted.push(record);
       } else {
         rejected.push(`Rejected ${record.source}: ${match.reason}`);
+        rejectedRecords.push({
+          source: record.source,
+          reason: match.reason,
+          title: this.cleanPlainText(record.title),
+          date: this.cleanPlainText(record.date || record.year),
+          doi: this.cleanPlainText(record.doi),
+        });
       }
     }
-    return { records: accepted, rejected };
+    return { records: accepted, rejected, rejectedRecords };
   }
 
   private static identityMatch(
@@ -390,12 +406,6 @@ export class ExternalMetadataResolver {
     if (lookupDOI && recordDOI) {
       if (lookupDOI !== recordDOI) {
         return { accept: false, reason: `DOI mismatch (${record.doi || "missing"})` };
-      }
-      if (lookupTitle && recordTitle && titleScore < this.MIN_TITLE_MATCH_SCORE) {
-        return { accept: false, reason: `DOI matches but title conflicts (${this.formatScore(titleScore)})` };
-      }
-      if (lookupYear && recordYear && lookupYear !== recordYear) {
-        return { accept: false, reason: `DOI matches but year conflicts (${recordYear})` };
       }
       return { accept: true };
     }
