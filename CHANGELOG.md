@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3 - 2026-05-05
+
+- Prevent duplicate Scrape, Update & Report entries in the Zotero item right-click menu by using a stable menu id and cleaning up older matching entries before registration.
+- Clean up the right-click menu entry during window unload and plugin shutdown.
+- Rename release XPI packages to `Scrape, Update & Report V[version].xpi`.
+
 ## 1.0.2 - 2026-05-04
 
 - Allow exact DOI matches to reach the Update/Cancel confirmation modal even when the external title differs from Zotero.

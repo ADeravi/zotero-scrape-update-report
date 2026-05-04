@@ -23,11 +23,13 @@ async function onMainWindowLoad(win: Window): Promise<void> {
 }
 
 async function onMainWindowUnload(win: Window): Promise<void> {
+  MetadataUIFactory.unregisterRightClickMenuItem();
   ztoolkit.unregisterAll();
   addon.data.dialog?.window?.close();
 }
 
 function onShutdown(): void {
+  MetadataUIFactory.unregisterRightClickMenuItem();
   ztoolkit.unregisterAll();
   addon.data.dialog?.window?.close();
   // Remove addon object

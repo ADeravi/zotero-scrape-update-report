@@ -2,6 +2,8 @@ import { StructuredInfoExtractor } from "./structuredInfo";
 import { getString } from "../utils/locale";
 
 export class MetadataUIFactory {
+  private static readonly RIGHT_CLICK_MENU_ID = "zotero-itemmenu-scrape-update-report-aderavi";
+
   public static registerPreferenceUI() {
     Zotero.PreferencePanes.register({
       pluginID: addon.data.config.addonID,
@@ -12,10 +14,13 @@ export class MetadataUIFactory {
   }
 
   public static registerRightClickMenuItem() {
+    const label = getString("menuitem-scrape-update-report");
     const menuIcon = this.getThemedMenuIcon();
+    this.unregisterRightClickMenuItem(label);
     ztoolkit.Menu.register("item", {
+      id: this.RIGHT_CLICK_MENU_ID,
       tag: "menuitem",
-      label: getString("menuitem-scrape-update-report"),
+      label,
       icon: menuIcon,
       commandListener: async () => {
         const items = Zotero.getActiveZoteroPane().getSelectedItems();
@@ -25,6 +30,24 @@ export class MetadataUIFactory {
         await this.oneClickUpdate(items);
       },
     });
+  }
+
+  public static unregisterRightClickMenuItem(label?: string): void {
+    try {
+      const menuPopup = Zotero.getMainWindow().document.querySelector("#zotero-itemmenu");
+      if (!menuPopup) {
+        return;
+      }
+      const labelsToRemove = new Set([label || getString("menuitem-scrape-update-report"), "Scrape, Update & Report"]);
+      for (const child of Array.from(menuPopup.children)) {
+        const element = child as Element;
+        if (element.id === this.RIGHT_CLICK_MENU_ID || labelsToRemove.has(element.getAttribute("label") || "")) {
+          element.remove();
+        }
+      }
+    } catch (_error) {
+      // Zotero may be closing its main window; stale menu nodes can be cleaned up on next registration.
+    }
   }
 
   private static async oneClickUpdate(items: Zotero.Item[]): Promise<void> {

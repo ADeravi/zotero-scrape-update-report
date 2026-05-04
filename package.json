@@ -1,6 +1,6 @@
 {
   "name": "zotero-scrape-update-report",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A Zotero plugin for one-click academic metadata scraping, safe field updates, keyword tagging, and discrepancy reports from DBLP, Semantic Scholar, and OpenAlex.",
   "config": {
     "addonName": "Scrape, Update & Report",
