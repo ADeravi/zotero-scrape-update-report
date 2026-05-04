@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.4 - 2026-05-05
+
+- Use GitHub's normalized release-asset URL in generated update JSON and public download links.
+- Keep the built local package filename and GitHub release asset label as `Scrape, Update & Report V[version].xpi`.
+
 ## 1.0.3 - 2026-05-05
 
 - Prevent duplicate Scrape, Update & Report entries in the Zotero item right-click menu by using a stable menu id and cleaning up older matching entries before registration.
