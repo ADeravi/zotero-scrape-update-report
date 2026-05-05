@@ -1,10 +1,12 @@
 # Scrape, Update & Report
 
-Scrape, Update & Report is a Zotero plugin for one-click academic metadata scraping, safe field updates, keyword tagging, and discrepancy reports from DBLP, Semantic Scholar, and OpenAlex.
+Scrape, Update & Report is a Zotero plugin and Zotero add-on for one-click academic paper metadata scraping, DOI metadata updates, safe bibliographic field updates, keyword tagging, and discrepancy reports from DBLP, Semantic Scholar, and OpenAlex.
 
 This repository is a maintained fork of [Creling/Zotero-Metadata-Scraper](https://github.com/Creling/Zotero-Metadata-Scraper). It remains licensed under AGPL-3.0-or-later.
 
 Project page: [https://aderavi.github.io/zotero-scrape-update-report/](https://aderavi.github.io/zotero-scrape-update-report/)
+
+Useful search terms: Zotero metadata scraper; Zotero metadata updater; Zotero DOI metadata; Zotero bibliographic metadata updater; Zotero keyword extraction; Zotero keyword tags; OpenAlex Zotero plugin; Semantic Scholar Zotero plugin; DBLP Zotero plugin; literature review Zotero tool; systematic review Zotero add-on; scoping review Zotero add-on; PRISMA Zotero workflow.
 
 ## How to use
 
@@ -19,6 +21,7 @@ Right-click the Zotero parent item and choose **Scrape, Update & Report** from t
 ## What It Does
 
 - Adds one Zotero item context-menu command: **Scrape, Update & Report**.
+- Works as a Zotero metadata scraper, DOI metadata updater, bibliographic metadata cleaner, and keyword tag generator.
 - Looks up selected papers in DBLP, Semantic Scholar, and OpenAlex.
 - Cross-checks external records against the Zotero item title, DOI, and date before writing fields.
 - Updates standard Zotero bibliographic fields instead of putting bibliographic data into `Extra`.
@@ -30,7 +33,7 @@ Right-click the Zotero parent item and choose **Scrape, Update & Report** from t
 
 ## Safety Model
 
-The plugin does not trust a DOI match by itself. External records are rejected when the DOI matches but the title or year strongly conflicts with the current Zotero item. This guards against corrupted provider records, including cases where OpenAlex maps a valid DOI to an unrelated work.
+The plugin treats an exact DOI match as a trusted external identity signal, but it still checks the title and date before writing fields. If the DOI matches but the title or date differs from the current Zotero item, Zotero shows a modal before any standard fields are changed.
 
 If a discrepancy is found, Zotero shows a modal with:
 
@@ -85,12 +88,9 @@ The normal child note includes:
 
 The error child note includes:
 
-- current Zotero identity
-- external merged identity
-- discrepancy details
-- source cross-checks
-- external records considered
-- a clear action warning
+- the reason the scrape/update could not safely continue
+- what matched and what did not match across title, date, and DOI
+- rejected external candidates and their source-level reason where available
 
 ## Development
 

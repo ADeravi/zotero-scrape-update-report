@@ -3,19 +3,23 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Scrape, Update & Report | Zotero Plugin</title>
+    <title>Scrape, Update & Report | Zotero Metadata Scraper & DOI Updater</title>
     <meta
       name="description"
-      content="Scrape, Update & Report is a Zotero plugin for one-click academic metadata updates, scrape report notes, keyword tags, and DBLP, Semantic Scholar, and OpenAlex cross-checking."
+      content="Scrape, Update & Report is a Zotero add-on for DOI metadata updates, bibliographic metadata scraping, keyword tags, and DBLP, Semantic Scholar, and OpenAlex cross-checking."
+    />
+    <meta
+      name="keywords"
+      content="Zotero plugin, Zotero add-on, Zotero metadata scraper, Zotero metadata updater, Zotero DOI metadata, Zotero bibliographic metadata, Zotero keyword tags, Zotero OpenAlex, Zotero Semantic Scholar, Zotero DBLP, literature review Zotero, systematic review Zotero, scoping review Zotero, PRISMA Zotero"
     />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#242424" />
     <link rel="canonical" href="https://aderavi.github.io/zotero-scrape-update-report/" />
     <link rel="icon" href="images/pickaxe-white.svg" type="image/svg+xml" />
-    <meta property="og:title" content="Scrape, Update & Report | Zotero Plugin" />
+    <meta property="og:title" content="Scrape, Update & Report | Zotero Metadata Scraper & DOI Updater" />
     <meta
       property="og:description"
-      content="A Zotero plugin for one-click academic metadata scraping, safe field updates, child scrape reports, and keyword tagging."
+      content="A Zotero add-on for one-click paper metadata scraping, DOI field updates, child scrape reports, OpenAlex/Semantic Scholar/DBLP cross-checking, and keyword tagging."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://aderavi.github.io/zotero-scrape-update-report/" />
@@ -27,7 +31,23 @@
         "name": "Scrape, Update & Report",
         "applicationCategory": "BrowserApplication",
         "operatingSystem": "Windows, macOS, Linux",
-        "description": "A Zotero plugin for one-click academic metadata scraping, safe field updates, child scrape reports, and keyword tagging from DBLP, Semantic Scholar, and OpenAlex.",
+        "description": "A Zotero add-on for one-click academic paper metadata scraping, DOI metadata updates, safe bibliographic field updates, child scrape reports, keyword tags, and cross-checking from DBLP, Semantic Scholar, and OpenAlex.",
+        "keywords": [
+          "Zotero plugin",
+          "Zotero add-on",
+          "Zotero metadata scraper",
+          "Zotero metadata updater",
+          "Zotero DOI metadata",
+          "Zotero bibliographic metadata",
+          "Zotero keyword tags",
+          "OpenAlex Zotero",
+          "Semantic Scholar Zotero",
+          "DBLP Zotero",
+          "literature review Zotero",
+          "systematic review Zotero",
+          "scoping review Zotero",
+          "PRISMA Zotero"
+        ],
         "softwareVersion": "1.0.4",
         "license": "https://www.gnu.org/licenses/agpl-3.0.en.html",
         "downloadUrl": "https://github.com/ADeravi/zotero-scrape-update-report/releases/download/v1.0.4/Scrape.Update.Report.V1.0.4.xpi",
@@ -215,6 +235,12 @@
         gap: 16px;
       }
 
+      .keyword-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px 24px;
+      }
+
       .feature {
         border: 1px solid var(--line);
         border-radius: 8px;
@@ -300,6 +326,10 @@
         .grid {
           grid-template-columns: 1fr;
         }
+
+        .keyword-list {
+          grid-template-columns: 1fr;
+        }
       }
 
       @media (max-width: 460px) {
@@ -322,8 +352,8 @@
           <div class="hero-copy">
             <h1>Scrape, Update & Report</h1>
             <p class="lead">
-              One-click academic metadata updates for Zotero, with safe bibliographic field updates, child scrape report
-              notes, keyword tags, and cross-checking from DBLP, Semantic Scholar, and OpenAlex.
+              A Zotero metadata scraper and DOI updater for academic papers, with safe bibliographic field updates,
+              child scrape report notes, keyword tags, and cross-checking from DBLP, Semantic Scholar, and OpenAlex.
             </p>
             <div class="actions" aria-label="Primary links">
               <a
@@ -392,20 +422,40 @@
         <h2 id="features">What it does</h2>
         <div class="grid">
           <article class="feature">
-            <h3>Updates standard fields</h3>
+            <h3>Zotero metadata updater</h3>
             <p>
               Bibliographic metadata goes into Zotero fields such as title, date, DOI, abstract, publisher, and venue.
             </p>
           </article>
           <article class="feature">
-            <h3>Creates report notes</h3>
+            <h3>Paper scrape report notes</h3>
             <p>Paper-content information and provenance are written into a child note for review and auditability.</p>
           </article>
           <article class="feature">
-            <h3>Cross-checks sources</h3>
+            <h3>OpenAlex, Semantic Scholar, DBLP</h3>
             <p>DBLP, Semantic Scholar, and OpenAlex records are checked against title, date, and DOI before updates.</p>
           </article>
         </div>
+      </section>
+
+      <section aria-labelledby="use-cases">
+        <h2 id="use-cases">Use Cases and Search Terms</h2>
+        <p>
+          This Zotero add-on is designed for researchers who need a metadata scraper, DOI metadata updater,
+          bibliographic metadata cleaner, keyword tag generator, and external source checker for academic paper
+          libraries, literature reviews, systematic reviews, scoping reviews, PRISMA screening, and thesis reference
+          management.
+        </p>
+        <ul class="keyword-list">
+          <li>Zotero plugin for metadata scraping</li>
+          <li>Zotero add-on for DOI metadata updates</li>
+          <li>Zotero bibliographic metadata updater</li>
+          <li>Zotero keyword extraction and tag generation</li>
+          <li>OpenAlex metadata lookup for Zotero</li>
+          <li>Semantic Scholar metadata lookup for Zotero</li>
+          <li>DBLP metadata lookup for Zotero</li>
+          <li>Zotero tool for literature reviews and PRISMA workflows</li>
+        </ul>
       </section>
 
       <section aria-labelledby="install">
