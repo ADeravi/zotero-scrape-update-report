@@ -42,16 +42,15 @@ export class OpenAlexService {
   }
 
   private static async requestJSON(url: string): Promise<any> {
-    const response = await (Zotero.HTTP.request as any)("GET", url, {
+    const response = await fetch(url, {
       headers: {
         Accept: "application/json",
       },
-      responseType: "json",
     });
-    if (!response.status || response.status < 200 || response.status >= 300) {
+    if (!response.ok) {
       throw new Error(`OpenAlex API error: ${response.status}`);
     }
-    return response.response;
+    return response.json();
   }
 
   public static restoreAbstract(invertedIndex: unknown): string {

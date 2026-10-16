@@ -124,16 +124,15 @@ export class SemanticScholarService {
       headers["x-api-key"] = apiKey;
     }
 
-    const response = await (Zotero.HTTP.request as any)("GET", url, {
+    const response = await fetch(url, {
       headers,
-      responseType: "json",
     });
 
-    if (!response.status || response.status !== 200) {
+    if (!response.ok) {
       throw new Error(`Semantic Scholar API error: ${response.status}`);
     }
 
-    return response.response;
+    return response.json();
   }
 
   public static getFieldKeywords(data: SemanticScholarResponse): string[] {

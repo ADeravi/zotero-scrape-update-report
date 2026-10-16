@@ -23,7 +23,8 @@ export class MetadataUIFactory {
       label,
       icon: menuIcon,
       commandListener: async () => {
-        const items = Zotero.getActiveZoteroPane().getSelectedItems();
+        const pane = Zotero.getActiveZoteroPane();
+        const items = pane?.getSelectedItems?.();
         if (!items || !items.length) {
           return;
         }
@@ -34,19 +35,21 @@ export class MetadataUIFactory {
 
   public static unregisterRightClickMenuItem(label?: string): void {
     try {
-      const menuPopup = Zotero.getMainWindow().document.querySelector("#zotero-itemmenu");
-      if (!menuPopup) {
-        return;
-      }
       const labelsToRemove = new Set([label || getString("menuitem-scrape-update-report"), "Scrape, Update & Report"]);
-      for (const child of Array.from(menuPopup.children)) {
-        const element = child as Element;
-        if (element.id === this.RIGHT_CLICK_MENU_ID || labelsToRemove.has(element.getAttribute("label") || "")) {
-          element.remove();
+      for (const win of Zotero.getMainWindows()) {
+        const menuPopup = win?.document?.querySelector("#zotero-itemmenu");
+        if (!menuPopup) {
+          continue;
+        }
+        for (const child of Array.from(menuPopup.children)) {
+          const element = child as Element;
+          if (element.id === this.RIGHT_CLICK_MENU_ID || labelsToRemove.has(element.getAttribute("label") || "")) {
+            element.remove();
+          }
         }
       }
     } catch (_error) {
-      // Zotero may be closing its main window; stale menu nodes can be cleaned up on next registration.
+      // Zotero may be closing a main window; stale menu nodes can be cleaned up on next registration.
     }
   }
 
