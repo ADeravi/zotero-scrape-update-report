@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.5 - 2026-10-17
+
+- Add Zotero 10 compatibility: bump `strict_max_version` to `10.*` so the plugin installs on Zotero 10.0.6.
+- Replace `Zotero.HTTP.request` with `fetch()` in OpenAlex and Semantic Scholar services.
+- Null-guard `Zotero.getActiveZoteroPane()` and clean up the right-click menu across all main windows.
+
 ## 1.0.4 - 2026-05-05
 
 - Use GitHub's normalized release-asset URL in generated update JSON and public download links.

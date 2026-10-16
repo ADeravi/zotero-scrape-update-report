@@ -98,7 +98,7 @@ The error child note includes:
 
 - Node.js 20+
 - npm
-- Zotero 7, 8, or 9
+- Zotero 7, 8, 9, or 10
 
 ### Install Dependencies
 
@@ -144,4 +144,4 @@ Licensed under [AGPL-3.0-or-later](LICENSE).
 
 Original project: [Creling/Zotero-Metadata-Scraper](https://github.com/Creling/Zotero-Metadata-Scraper), copyright creling.
 
-This fork adds Zotero 9 compatibility range, one-click scrape/update/report flow, DBLP/Semantic Scholar/OpenAlex cross-checking, safer identity matching, discrepancy/error notes, keyword tagging, and theme-aware icon updates.
+This fork adds Zotero 10 compatibility range, one-click scrape/update/report flow, DBLP/Semantic Scholar/OpenAlex cross-checking, safer identity matching, discrepancy/error notes, keyword tagging, and theme-aware icon updates.
